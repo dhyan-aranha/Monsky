@@ -8,3 +8,7 @@ name = "Monsky"
 [[lean_exe]]
 name = "monsky"
 root = "Main"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
