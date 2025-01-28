@@ -1,6 +1,11 @@
 import Mathlib.Tactic
-import FormalBook.Appendix
-import FormalBook.sperner_pjotr
+import Monsky.Appendix
+import Monsky.miscellaneous
+import Monsky.basic_definitions
+import Monsky.segment_triangle
+import Monsky.segment_counting
+import Monsky.simplex_basic
+import Monsky.square
 
 
 /-!

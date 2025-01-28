@@ -1,9 +1,9 @@
 import Mathlib
 import Mathlib.Tactic
-import FormalBook.sperner.simplex_basic
-import FormalBook.sperner.segment_triangle
-import FormalBook.sperner.miscellaneous
-import FormalBook.sperner.basic_definitions
+import Monsky.simplex_basic
+import Monsky.segment_triangle
+import Monsky.miscellaneous
+import Monsky.basic_definitions
 
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
