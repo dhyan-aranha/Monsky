@@ -24,8 +24,8 @@ Below is a summary of our work with links to the relevant files in this reposito
    Two important ones are: i) Any line in S containes at most two colors, ii) The area of a rainbow triangle cannot be 0 and it cannot be 1/n
    for n odd.
 
-3) The files [Segment_counting.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_counting.lean),  [Segment_triangle.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_triangle.lean),  and [square.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/square.lean) contain the proof of Monsky's theorem as well
-  as the proof that even dissections always exist. This is by far the most technincal part of the work.  There are still a few sorrys which we hope to fill soon. For the latest developments in this file please check out the sperner branch. Here we would like to recognize
+3) The files [Segment_counting.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_counting.lean),  [Segment_triangle.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_triangle.lean),  and [square.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/square.lean) contain the main part of the proof of Monsky's theorem as well
+  as the proof that even dissections always exist. This is by far the most technincal part of the work.  There are still a few sorrys which we hope to fill soon. Here we would like to recognize
   the contributions of Pjotr Buys!
 
 4) Finally in [Triangle_corollary.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/Triangle_corollary.lean) we formalize the comparison
