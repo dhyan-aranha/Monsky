@@ -10,7 +10,7 @@ We also formalize and prove the theorem that it is always possible to do this wi
 
 ***Theorem***: It is always possible to dissect a square into an even number of triangles of equal area.
 
-(This was carried out by Pjotr Buys in [Monsky_even](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/Monsky_even.lean)
+(This was carried out by Pjotr Buys in [Monsky_even](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/Monsky_even.lean))
 
 Below is a summary of our work with links to the relevant files in this repository. 
 
