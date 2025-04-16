@@ -2,15 +2,9 @@
 
 Contributors (in alphabetical order): Dhyan Aranha, Pjotr Buys, Malvin Gattinger, Giacomo Grevink, Jan Hendriks, Thomas Koopman, Dion Leijnse, Thijs Maessen, Maris Ozols, Jonas van der Schaaf, Lenny Taelman
 
-In this project we formalize the following theorem:
+In this project we formalize and prove the following theorem:
 
-***Theorem (Monsky)*** : It is not possible to dissect a square into an odd number of triangles of equal area. 
-
-We also formalize and prove the theorem that it is always possible to do this with an even number of triangles of equal area. 
-
-***Theorem***: It is always possible to dissect a square into an even number of triangles of equal area.
-
-(This was carried out by Pjotr Buys in [Monsky_even](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/Monsky_even.lean))
+***[Theorem (Monsky)](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/main_statement.lean)*** : It is possible to dissect a square into n triangles of equal area if and only if n not zero and even. 
 
 Below is a summary of our work with links to the relevant files in this repository. 
 
@@ -24,8 +18,8 @@ Below is a summary of our work with links to the relevant files in this reposito
    Two important ones are: i) Any line in S containes at most two colors, ii) The area of a rainbow triangle cannot be 0 and it cannot be 1/n
    for n odd.
 
-3) The files [Segment_counting.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_counting.lean),  [Segment_triangle.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_triangle.lean),  and [square.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/square.lean) contain the main part of the proof of Monsky's theorem as well
-  as the proof that even dissections always exist. This is by far the most technincal part of the work.  There are still a few sorrys which we hope to fill soon. Here we would like to recognize
+3) The files [main_statement](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/main_statement.lean), [monsky_even](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/monsky_even.lean), [Segment_counting.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_counting.lean),  [Segment_triangle.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/segment_triangle.lean),  and [square.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/square.lean) contain the main part of the proof of Monsky's theorem as well
+  as the proof that even dissections always exist. This is by far the most technincal part of the work. Here we would like to recognize
   the contributions of Pjotr Buys!
 
 4) Finally in [Triangle_corollary.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/Triangle_corollary.lean) we formalize the comparison
