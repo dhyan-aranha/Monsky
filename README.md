@@ -4,7 +4,7 @@ Contributors (in alphabetical order): Dhyan Aranha, Pjotr Buys, Malvin Gattinger
 
 In this project we formalize and prove the following theorem:
 
-***[Theorem (Monsky)](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/main_statement.lean)*** : It is possible to dissect a square into n triangles of equal area if and only if n not zero and even. 
+***[Theorem (Monsky)](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/main_statement.lean)*** : It is possible to dissect a square into n triangles of equal area if and only if n is not zero and even. 
 
 Below is a summary of our work with links to the relevant files in this repository. 
 
