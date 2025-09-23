@@ -1,7 +1,7 @@
 import Mathlib
-import FormalBook.sperner.segment_counting
-import FormalBook.sperner.Triangle_corollary
-import FormalBook.sperner.monsky_even
+import Monsky.segment_counting
+import Monsky.Triangle_corollary
+import Monsky.monsky_even
 
 local notation "Triangle" => Fin 3 → (EuclideanSpace ℝ (Fin 2))
 
