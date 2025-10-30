@@ -24,3 +24,8 @@ Below is a summary of our work with links to the relevant files in this reposito
 
 4) Finally in [Triangle_corollary.lean](https://github.com/dhyan-aranha/Monsky/blob/main/Monsky/Triangle_corollary.lean) we formalize the comparison
    between the area of a triangle in R^2 given by measure theory and the formula given in terms of the determinant.
+
+
+## License
+
+Apache 2.0; see [`LICENSE`](LICENSE) for details.
