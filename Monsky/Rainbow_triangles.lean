@@ -1,7 +1,7 @@
 import Mathlib.Tactic
-import FormalBook.Appendix
-import FormalBook.sperner.simplex_basic
-import FormalBook.sperner.segment_triangle
+import Monsky.Appendix
+import Monsky.simplex_basic
+import Monsky.segment_triangle
 
 /-!
 # One square and an odd number of triangles

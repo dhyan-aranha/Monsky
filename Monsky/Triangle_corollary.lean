@@ -3,17 +3,10 @@ import Mathlib
 import Mathlib.Order.Basic
 import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 import Mathlib.Dynamics.Ergodic.MeasurePreserving
-import FormalBook.sperner.basic_definitions
-import FormalBook.sperner.simplex_basic
-import FormalBook.sperner.segment_triangle
-import FormalBook.sperner.square
--- import Mathlib.Tactic
--- import Mathlib.Analysis.InnerProductSpace.PiL2
--- import Mathlib.Data.Finset.Basic
--- import Mathlib.Order.Defs
--- import Mathlib.Data.Real.Sign
--- import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
--- import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
+import Monsky.basic_definitions
+import Monsky.simplex_basic
+import Monsky.segment_triangle
+import Monsky.square
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²

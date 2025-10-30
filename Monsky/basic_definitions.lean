@@ -1,6 +1,6 @@
 import Mathlib
 import Mathlib.Tactic
-import FormalBook.sperner.segment_triangle
+import Monsky.segment_triangle
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²

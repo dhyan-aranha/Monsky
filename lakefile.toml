@@ -1,13 +1,9 @@
 name = "Monsky"
 version = "0.1.0"
-defaultTargets = ["monsky"]
+defaultTargets = ["Monsky"]
 
 [[lean_lib]]
 name = "Monsky"
-
-[[lean_exe]]
-name = "monsky"
-root = "Main"
 
 [[require]]
 name = "mathlib"

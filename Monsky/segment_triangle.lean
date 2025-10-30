@@ -1,7 +1,7 @@
 import Mathlib
 import Mathlib.Tactic
-import FormalBook.sperner.simplex_basic
-import FormalBook.sperner.miscellaneous
+import Monsky.simplex_basic
+import Monsky.miscellaneous
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²
