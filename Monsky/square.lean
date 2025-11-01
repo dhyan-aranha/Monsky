@@ -1,10 +1,4 @@
-import Mathlib
-import Mathlib.Tactic
-import Monsky.simplex_basic
-import Monsky.segment_triangle
-import Monsky.miscellaneous
 import Monsky.basic_definitions
-
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²
@@ -40,14 +34,11 @@ lemma closed_unit_square_eq : closed_hull unit_square = {x | ∀ i, 0 ≤ x i �
     · rw [Fin.sum_univ_four]; ring
     · ext i; fin_cases i <;> (simp [Fin.sum_univ_four, unit_square, v]; ring)
 
-
-
--- The open unit square is more or less the same
+/-- The open unit square is more or less the same -/
 lemma open_unit_square_eq : open_hull unit_square = {x | ∀ i, 0 < x i ∧ x i < 1} := by
   ext x
   constructor
-  · intro ⟨α, hα, hxα⟩
-    intro i
+  · intro ⟨α, hα, hxα⟩ i
     rw [←hxα]
     constructor
     · fin_cases i <;> simp [unit_square, Fin.sum_univ_four, Left.add_pos,v , hα.1]
@@ -116,8 +107,17 @@ lemma segment_in_boundary_square {x : ℝ²} (hx : x ∈ boundary unit_square)
     simp [hxi] at ht₂
     linarith [mul_pos hδ (real_sign_mul_self hvec)]
 
+-- @[deprecated "No replacement, use constituent lemmas from proof." (since := "2025-02-27")]
+theorem lt_mul_of_one_lt_of_le_of_pos {a b c : ℝ} (ha : 1 < a) (h : b ≤ c) (hc : 0 < c) :
+    b < a * c :=
+  h.trans_lt <| lt_mul_of_one_lt_left hc ha
 
-/- A version that states that the open_unit_square is open. -/
+-- @[deprecated "No replacement, use constituent lemmas from proof." (since := "2025-02-27")]
+theorem mul_lt_of_lt_one_of_le_of_pos {a b c : ℝ} (ha : a < 1) (h : b ≤ c) (hb : 0 < b) :
+    a * b < c :=
+  (mul_lt_of_lt_one_left hb ha).trans_le h
+
+/-- A version that states that the open_unit_square is open. -/
 --The proof below is not as difficult as it seems, but I just needed a lot of explicit bounds because simp was not cooperating
 lemma open_unit_square_open_dir {x : ℝ²} (y : ℝ²) (hx : x ∈ open_hull unit_square) :
     ∃ (ε : ℝ), ε > 0 ∧ ∀ (n : ℕ), x + (1 / (n : ℝ)) • (ε • y) ∈ open_hull unit_square := by
@@ -125,10 +125,9 @@ lemma open_unit_square_open_dir {x : ℝ²} (y : ℝ²) (hx : x ∈ open_hull un
   -- The constant we will choose is of order 1/ y, so we have to make an exception for y =0
   by_cases h : ∀ i, (y  i= 0) -- this formulation was slightly easier for me
   · use 1
-    have h1: y = 0
-    . ext i; exact h i
-    rw[h1]
-    simp[hx]
+    have h1 : y = 0 := by ext i; exact h i
+    subst h1
+    aesop
   -- I would prefer to define the epsilon with an infinum over i, rather than doing it explicitly,
   -- but I could not find the right api to show this infinum is bigger than zero (as it is only a infinum over a finite index)
   · use ((1/(max |y 0| |y 1|))*(1/2) )* min (min (x 0) (1- x 0)) (min (x 1) (1 - x 1))
@@ -149,7 +148,8 @@ lemma open_unit_square_open_dir {x : ℝ²} (y : ℝ²) (hx : x ∈ open_hull un
     · exact mul_pos (by simp[h2]) hxbound
     · have h3: ∀ i, |-y i| <  (2*(max |y 0| |y 1|))
       · intro i
-        refine lt_mul_of_one_lt_of_le_of_pos (by norm_num) ?_ h2
+        simp only [gt_iff_lt] at h2
+        refine lt_mul_of_one_lt_of_le_of_pos (a := 2) (by grind) ?_ h2
         fin_cases i <;> simp
       have h4: ∀ i, x i ≥  (x 0 ⊓ (1 - x 0)) ⊓ (x 1 ⊓ (1 - x 1))
       · intro i; fin_cases i
@@ -166,20 +166,20 @@ lemma open_unit_square_open_dir {x : ℝ²} (y : ℝ²) (hx : x ∈ open_hull un
       · rw[hn]; simp[hx i]
       --for n≥ 1, the proof is as follows
       have hn4 : (n : ℝ ) ≥ 1 :=  Nat.one_le_cast.mpr ( Nat.one_le_iff_ne_zero.mpr hn)
-      have h7: (1/(n: ℝ )) ≤  1 := by exact (div_le_one₀ (gt_of_ge_of_gt hn4 (by norm_num))).mpr hn4
+      have h7: (1/(n: ℝ )) ≤  1 := by exact (div_le_one₀ (lt_of_le_of_lt' hn4 (by norm_num))).mpr hn4
       constructor
       · apply neg_lt_iff_pos_add.mp
         have h6: -((↑n)⁻¹ * ((|y 0| ⊔ |y 1|)⁻¹ * 2⁻¹ * (x 0 ⊓ (1 - x 0) ⊓ (x 1 ⊓ (1 - x 1))) * y i)) =    ((-y i) / (2*(|y 0| ⊔ |y 1|))) * (1/n)* (x 0 ⊓ (1 - x 0) ⊓ (x 1 ⊓ (1 - x 1))) := by ring
         rw[h6]
         refine  mul_lt_of_lt_one_of_le_of_pos ?_ (h4 i) hxbound
-        refine  mul_lt_of_lt_one_of_le_of_pos ?_ (h7) (one_div_pos.mpr (gt_of_ge_of_gt hn4 (by norm_num)))
+        refine  mul_lt_of_lt_one_of_le_of_pos ?_ (h7) (one_div_pos.mpr (lt_of_le_of_lt' hn4 (by norm_num)))
         apply Bound.div_lt_one_of_pos_of_lt h8 (lt_of_abs_lt (h3 i))
 
       · apply lt_tsub_iff_left.mp
         have h6: ((↑n)⁻¹ * ((|y 0| ⊔ |y 1|)⁻¹ * 2⁻¹ * (x 0 ⊓ (1 - x 0) ⊓ (x 1 ⊓ (1 - x 1))) * y i)) =    ((y i) / (2*(|y 0| ⊔ |y 1|))) * (1/n)* (x 0 ⊓ (1 - x 0) ⊓ (x 1 ⊓ (1 - x 1))) := by ring
         rw[h6]
         refine  mul_lt_of_lt_one_of_le_of_pos ?_ (h5 i) hxbound
-        refine  mul_lt_of_lt_one_of_le_of_pos ?_ (h7) (one_div_pos.mpr (gt_of_ge_of_gt hn4 (by norm_num)))
+        refine  mul_lt_of_lt_one_of_le_of_pos ?_ (h7) (one_div_pos.mpr (lt_of_le_of_lt' hn4 (by norm_num)))
         simp_rw[abs_neg] at h3
         apply Bound.div_lt_one_of_pos_of_lt h8 (lt_of_abs_lt (h3 i))
 
@@ -229,9 +229,9 @@ lemma el_boundary_square_triangle_dir {x : ℝ²} (hx : x ∈ boundary unit_squa
             · unfold seg_vec at hL
               fin_cases i <;>(
                 cases' hσ with hσ hσ <;>(
-                  simp [hσ, neg_eq_zero] at hL
+                  simp [hσ] at hL
                   ring_nf at hL
-                  try simp [neg_eq_zero,v] at hL
+                  try simp [neg_eq_zero] at hL
                   linarith [lt_min hδ hδ']
                   ))
         · apply aux_det₂
@@ -312,7 +312,7 @@ lemma segment_triangle_pairing_int
       have hΔneq : Δ' ≠ Δ := by
         by_contra hΔeq
         rw [hΔeq] at hMemΔ'
-        apply haout ((1/ (l : ℝ) * ε)) (by field_simp)
+        apply haout ((1/ (l : ℝ) * ε)) (by field_simp; simp; linarith)
         convert hMemΔ' using 2
         simp [mul_smul]
       -- Then we prove that x ∈ closed_hull Δ'
@@ -547,15 +547,17 @@ lemma square_boundary_big_inter_seg {S : Segment} {x : ℝ²} {i : Fin 4} (hx : 
   have hαsum : α 0 + α 1 = 1 := by convert hα.2; exact (Fin.sum_univ_two α).symm
   clear hαx
   -- Unfortunately I couldn't get the simp to close it all, so there is a nonterminating simp here.
-  fin_cases i <;> fin_cases j <;> simp_all
-  · exact (square_boundary_big_inter_seg_aux₁ (hα.1 0) (hS 0 1).1 (hα.1 1) (hS 1 1).1 hxi.2.2).1
-  · exact (square_boundary_big_inter_seg_aux₁ (hα.1 0) (hS 0 1).1 (hα.1 1) (hS 1 1).1 hxi.2.2).2
-  · exact (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) (hS 0 0).2 (hα.1 1) (hS 1 0).2 hxi.2.2).1
-  · exact (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) (hS 0 0).2 (hα.1 1) (hS 1 0).2 hxi.2.2).2
-  · exact (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) (hS 0 1).2 (hα.1 1) (hS 1 1).2 hxi.2.2).1
-  · exact (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) (hS 0 1).2 (hα.1 1) (hS 1 1).2 hxi.2.2).2
-  · exact (square_boundary_big_inter_seg_aux₁ (hα.1 0) (hS 0 0).1 (hα.1 1) (hS 1 0).1 hxi.2.2).1
-  · exact (square_boundary_big_inter_seg_aux₁ (hα.1 0) (hS 0 0).1 (hα.1 1) (hS 1 0).1 hxi.2.2).2
+  fin_cases i <;> fin_cases j <;> simp_all only [Fin.forall_fin_two, Fin.isValue, Set.mem_setOf_eq,
+    and_self, Fin.reduceFinMk, boundary_line_rw, Fin.reduceAdd, boundary_constant_rw,
+    PiLp.add_apply, PiLp.smul_apply, smul_eq_mul, Fin.mk_one, true_and]
+  · refine (square_boundary_big_inter_seg_aux₁ (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).1 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₁ (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).2 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).1 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).2 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).1 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₂ hαsum (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).2 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₁ (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).1 <;> simp_all
+  · refine (square_boundary_big_inter_seg_aux₁ (hα.1 0) ?_ (hα.1 1) ?_ hxi.2.2).2 <;> simp_all
 
 lemma convex_faces  {x y p : ℝ²} (i : Fin 4) (hpiface : p ∈ closed_hull (square_boundary_big i))
 (hp : p ∈ open_hull (to_segment x y)) (hx: x ∈ closed_hull unit_square) (hy: y ∈  closed_hull unit_square) :
@@ -582,8 +584,8 @@ lemma square_boundary_pairwise_inter {i : Fin 4} :
   ext x; rw [Set.mem_singleton_iff]
   constructor
   · intro _; ext j
-    fin_cases i <;> fin_cases j <;> simp_all [square_boundary_big, unit_square]
-  · exact fun h ↦ by fin_cases i <;> simp [h, square_boundary_big, unit_square]
+    fin_cases i <;> fin_cases j <;> simp_all [unit_square]
+  · exact fun h ↦ by fin_cases i <;> simp [h, unit_square]
 
 
 lemma square_corner_in_boundary {i : Fin 4} :
@@ -609,7 +611,7 @@ lemma segment_through_corner {S : Segment} {i : Fin 4} (hx : unit_square i ∈ o
 
 lemma cover_imples_corner_in_triangle
     {S : Finset Triangle}
-    (hCover : is_cover (closed_hull unit_square) S.toSet) :
+    (hCover : is_cover (closed_hull unit_square) (SetLike.coe S)) :
     ∀ i, ∃ T ∈ S, ∃ j, unit_square i = T j := by
   by_contra h_contra; push_neg at h_contra
   have ⟨c, hc⟩ := h_contra
@@ -654,12 +656,11 @@ lemma unit_square_is_convex_open {S : Segment} (hS : closed_hull S ⊆ boundary 
   rcases hS with ⟨ i, hS⟩
   exact ⟨ i, open_segment_sub' hS hNondegen⟩
 
-
 lemma open_hull_segment_in_boundary {S : Segment}
     (hS : open_hull S ⊆ boundary unit_square)
-    (hcS : closed_hull S ⊆ closed_hull unit_square)
-  : ∃ i, closed_hull S ⊆ closed_hull (square_boundary_big i) := by
-have ⟨x, hx⟩ := open_pol_nonempty (by norm_num) S
-have ⟨i, hi⟩ := boundary_in_square_boundary (hS hx)
-use i
-apply square_boundary_big_inter_seg hx hi hcS
+    (hcS : closed_hull S ⊆ closed_hull unit_square) :
+    ∃ i, closed_hull S ⊆ closed_hull (square_boundary_big i) := by
+  have ⟨x, hx⟩ := open_pol_nonempty (by norm_num) S
+  have ⟨i, hi⟩ := boundary_in_square_boundary (hS hx)
+  use i
+  apply square_boundary_big_inter_seg hx hi hcS

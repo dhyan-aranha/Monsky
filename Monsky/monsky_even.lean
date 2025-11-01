@@ -1,10 +1,4 @@
-import Mathlib
-import Monsky.simplex_basic
-import Monsky.segment_triangle
-import Monsky.basic_definitions
-import Monsky.Rainbow_triangles
 import Monsky.square
-
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²
@@ -15,7 +9,7 @@ open BigOperators
 open Finset
 
 
-/- This rewriting is for convenience. -/
+/-- This rewriting is for convenience. -/
 def disjoint_set {α β : Type} (X : Set α) (f : α → Set β) := ∀ a₁ a₂, a₁ ∈ X → a₂ ∈ X → a₁ ≠ a₂ → Disjoint (f a₁) (f a₂)
 def covers {α β} (X : Set α) (Y : Set β) (f : α → Set β) := Y = ⋃ a ∈ X, f a
 
@@ -39,11 +33,10 @@ lemma disjoint_aux {α β : Type} (S₁ S₂ : Set α) (f : α → Set β) (h₁
   · exact h₂ a₁ a₂ ha₁ ha₂ hneq
 
 
-/-
-  The square can be covered by an even number of triangles.
--/
+/-! The square can be covered by an even number of triangles. -/
 
-/- These two triangles dissect the square and have equal area.-/
+/-! These two triangles dissect the square and have equal area.-/
+
 def Δ₀  : Triangle  := fun | 0 => (v 0 0) | 1 => (v 1 0) | 2 => (v 0 1)
 def Δ₀' : Triangle  := fun | 0 => (v 1 0) | 1 => (v 0 1) | 2 => (v 1 1)
 
@@ -53,10 +46,9 @@ lemma areaΔ₀ : triangle_area Δ₀ = 1 / 2 := by
 lemma areaΔ₀' : triangle_area Δ₀' = 1 / 2 := by
   simp [triangle_area, det, Δ₀']
 
+/-! Now we show how a cover of size two implies a cover of any even size.-/
 
-/- Now we show how a cover of size two implies a cover of any even size.-/
-
-/- Elementary stuff about scaling (only in the y direction).-/
+/-! Elementary stuff about scaling (only in the y direction).-/
 
 def scale_vector (a : ℝ) (y : ℝ²) : ℝ² := fun | 0 => y 0 | 1 => a * y 1
 
@@ -72,7 +64,7 @@ lemma scale_triangle_area (a : ℝ) (T : Triangle)
   simp only [triangle_area, scale_triangle_det a T, abs_mul, mul_div_assoc]
 
 
-/- Elementary stuff about translating (only in the y direction).-/
+/-! Elementary stuff about translating (only in the y direction).-/
 
 def translate_vector (a : ℝ) (x : ℝ²) : ℝ² := fun | 0 => x 0 | 1 => a + x 1
 def translate_triangle (a : ℝ) (T : Triangle) : Triangle := fun i ↦ translate_vector a (T i)
@@ -153,7 +145,8 @@ lemma fin_el_bound {n : ℕ} {x: ℝ} {s₁ s₂ : Fin n} (h₁l : x - 1 < s₁)
 lemma zig_open_disjoint{n : ℕ} : disjoint_set ((zig_part_cover n) : Set Triangle) open_hull := by
   by_cases nsign : ↑n > 0
   · intro Δ₁ Δ₂ hΔ₁ hΔ₂ hΔneq
-    simp [mem_coe, zig_part_cover] at hΔ₁ hΔ₂
+    simp only [zig_part_cover, one_div, coe_image, coe_univ, Set.image_univ,
+      Set.mem_range] at hΔ₁ hΔ₂
     have ⟨s₁,hs₁⟩ := hΔ₁
     have ⟨s₂,hs₂⟩ := hΔ₂
     rw [@Set.disjoint_right]
@@ -166,17 +159,22 @@ lemma zig_open_disjoint{n : ℕ} : disjoint_set ((zig_part_cover n) : Set Triang
     have hx₂₀ := hx₂ 0
     have hx₂₂ := hx₂ 2
     · refine hΔneq ?_
-      simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
+      simp [Tco, sign_seg, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
       field_simp [nsign] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
-      rw [←hs₁, ←hs₂, fin_el_bound (by linarith) hx₁₂ (by linarith) hx₂₂]
-    · simp [det, translate_triangle, scale_triangle, Δ₀, translate_vector, scale_vector, Nat.not_eq_zero_of_lt nsign]
-    · simp [det, translate_triangle, scale_triangle, Δ₀, translate_vector, scale_vector, Nat.not_eq_zero_of_lt nsign]
+      rw [←hs₁, ←hs₂]
+      simp at *
+      have := fin_el_bound (by grind) hx₁₂ (by grind) hx₂₂
+      rw [this]
+    · simp [det, translate_triangle, scale_triangle, Δ₀, translate_vector, scale_vector]
+      grind
+    · simp [det, translate_triangle, scale_triangle, Δ₀, translate_vector, scale_vector]
+      grind
   · simp [Nat.eq_zero_of_not_pos nsign, zig_part_cover, disjoint_set]
 
 lemma zag_open_disjoint{n : ℕ} : disjoint_set ((zag_part_cover n) : Set Triangle) open_hull := by
   by_cases nsign : ↑n > 0
   · intro Δ₁ Δ₂ hΔ₁ hΔ₂ hΔneq
-    simp [mem_coe, zag_part_cover] at hΔ₁ hΔ₂
+    simp [zag_part_cover] at hΔ₁ hΔ₂
     have ⟨s₁,hs₁⟩ := hΔ₁
     have ⟨s₂,hs₂⟩ := hΔ₂
     rw [@Set.disjoint_right]
@@ -189,15 +187,15 @@ lemma zag_open_disjoint{n : ℕ} : disjoint_set ((zag_part_cover n) : Set Triang
     have hx₂₀ := hx₂ 0
     have hx₂₂ := hx₂ 2
     · refine hΔneq ?_
-      simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀'] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
+      simp [Tco, sign_seg, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀'] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
       ring_nf at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
       field_simp [nsign] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₂
       rw [←hs₁, ←hs₂, fin_el_bound (x := x 1 * ↑n) (s₁ := s₁) (s₂ := s₂) (by linarith) (by linarith) (by linarith) (by linarith)]
-    · simp [det, translate_triangle, scale_triangle, Δ₀', translate_vector, scale_vector, Nat.not_eq_zero_of_lt nsign]
-      field_simp [Nat.not_eq_zero_of_lt nsign]
+    · simp [det, translate_triangle, scale_triangle, Δ₀', translate_vector, scale_vector]
+      field_simp [Nat.ne_zero_of_lt nsign]
       ring_nf; norm_num
-    · simp [det, translate_triangle, scale_triangle, Δ₀', translate_vector, scale_vector, Nat.not_eq_zero_of_lt nsign]
-      field_simp [Nat.not_eq_zero_of_lt nsign]
+    · simp [det, translate_triangle, scale_triangle, Δ₀', translate_vector, scale_vector]
+      field_simp [Nat.ne_zero_of_lt nsign]
       ring_nf; norm_num
   · simp [Nat.eq_zero_of_not_pos nsign, zag_part_cover, disjoint_set]
 
@@ -205,7 +203,7 @@ lemma zig_zag_open_disjoint {n : ℕ}
     : ∀ a₁ a₂, a₁ ∈ (zig_part_cover n) → a₂ ∈ (zag_part_cover n) → Disjoint (open_hull a₁) (open_hull a₂) := by
   by_cases nsign : ↑n > 0
   · intro Δ₁ Δ₂ hΔ₁ hΔ₂
-    simp [mem_coe, zig_part_cover, zag_part_cover] at hΔ₁ hΔ₂
+    simp [zig_part_cover, zag_part_cover] at hΔ₁ hΔ₂
     have ⟨s₁,hs₁⟩ := hΔ₁
     have ⟨s₂,hs₂⟩ := hΔ₂
     rw [@Set.disjoint_right]
@@ -218,18 +216,22 @@ lemma zig_zag_open_disjoint {n : ℕ}
     have hx₂₀ := hx₂ 0
     have hx₂₁ := hx₂ 1
     have hx₂₂ := hx₂ 2
-    · simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀'] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₁ hx₂₂
+    · simp [Tco, sign_seg, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀'] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₁ hx₂₂
       ring_nf at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₁ hx₂₂
       field_simp [nsign] at hx₁₀ hx₁₁ hx₁₂ hx₂₀ hx₂₁ hx₂₂
       have l := fin_el_bound (x := x 1 * ↑n) (s₁ := s₁) (s₂ := s₂) (by linarith) (by linarith) (by linarith) (by linarith)
       rw [l] at hx₁₀ hx₁₂
       linarith
-    · simp [det, translate_triangle, scale_triangle, Δ₀', translate_vector, scale_vector, Nat.not_eq_zero_of_lt nsign]
-      field_simp [Nat.not_eq_zero_of_lt nsign]
+    · simp only [det, Fin.isValue, translate_triangle, translate_vector, scale_triangle,
+      scale_vector, Δ₀', v₁_val, mul_zero, add_zero, mul_one, sub_add_cancel_left, v₀_val, zero_sub,
+      neg_mul, one_mul, neg_add_rev, zero_mul, sub_zero, ne_eq]
+      field_simp
       ring_nf; norm_num
-    · simp [det, translate_triangle, scale_triangle, Δ₀, translate_vector, scale_vector, Nat.not_eq_zero_of_lt nsign]
-  · simp [Nat.eq_zero_of_not_pos nsign, zag_part_cover, disjoint_set]
-
+    · simp only [det, Fin.isValue, translate_triangle, translate_vector, scale_triangle,
+      scale_vector, Δ₀, v₁_val, mul_zero, add_zero, sub_self, v₀_val, sub_zero, mul_one, one_mul,
+      zero_add, zero_mul, zero_sub, add_neg_cancel_comm, ne_eq, inv_eq_zero, Nat.cast_eq_zero]
+      grind
+  · simp [Nat.eq_zero_of_not_pos nsign, zag_part_cover]
 
 lemma zig_zag_covers_square {n : ℕ} (hn : n ≠ 0)
     : covers ((zig_part_cover n ∪ zag_part_cover n) : Set Triangle) (closed_hull unit_square) closed_hull := by
@@ -248,21 +250,28 @@ lemma zig_zag_covers_square {n : ℕ} (hn : n ≠ 0)
           rw [zig_part_cover,mem_image]
           refine ⟨⟨j,?_⟩ ,by simp⟩
           rw [propext (Nat.floor_lt' hn)]
-          convert (mul_lt_mul_left ?_).mpr hx₁
+          convert (mul_lt_mul_iff_right₀ ?_).mpr hx₁
           · ring
           · rw [Nat.cast_pos]
             exact Nat.zero_lt_of_ne_zero hn
         · rw [closed_triangle_iff]
           · intro i
-            fin_cases i <;> (
-              simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀'];
+            fin_cases i
+            case h.right.«2» =>
+              simp only [Tco, sign_seg, det, Fin.isValue, Tside, translate_triangle,
+                translate_vector, scale_triangle, scale_vector, one_div, Δ₀, v₁_val, mul_zero,
+                add_zero, sub_self, zero_mul, v₀_val, sub_zero, one_mul, zero_add, zero_sub,
+                mul_one, add_neg_cancel_comm, div_inv_eq_mul]
               field_simp [hn]
               ring_nf
-              try linarith [hx 0 ]
-            )
-            convert Nat.floor_le (a := ↑n * x 1) ?_ using 1
-            · exact mul_comm _ _
-            · exact Left.mul_nonneg (Nat.cast_nonneg' _) (hx 1).1
+              rw [@sub_nonneg]
+              convert Nat.floor_le (a := ↑n * x 1) ?_ using 1
+              · rw [mul_comm]
+              · apply Left.mul_nonneg (Nat.cast_nonneg' _) (by tauto)
+            all_goals
+              simp [Tco, sign_seg, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀]
+              field_simp [hn]
+              grind
           · rw [translate_triangle_det, scale_triangle_det, mul_ne_zero_iff_right]
             · simp only [one_div, ne_eq, inv_eq_zero, Nat.cast_eq_zero, hn, not_false_eq_true]
             · simp [det, Δ₀]
@@ -272,24 +281,34 @@ lemma zig_zag_covers_square {n : ℕ} (hn : n ≠ 0)
           rw [zag_part_cover,mem_image]
           refine ⟨⟨j,?_⟩ ,by simp⟩
           rw [propext (Nat.floor_lt' hn)]
-          convert (mul_lt_mul_left ?_).mpr hx₁
+          convert (mul_lt_mul_iff_right₀ ?_).mpr hx₁
           · ring
           · rw [Nat.cast_pos]
             exact Nat.zero_lt_of_ne_zero hn
         · rw [closed_triangle_iff]
           · intro i
-            fin_cases i <;> (
-              simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀'];
+            fin_cases i
+            case h.right.«0» =>
+              simp only [Tco, sign_seg, det, Fin.isValue, Tside, translate_triangle,
+                translate_vector, scale_triangle, scale_vector, one_div, Δ₀', v₁_val, mul_one,
+                sub_self, zero_mul, v₀_val, sub_zero, one_mul, zero_add, zero_sub, neg_add_rev,
+                mul_zero, add_zero, sub_add_cancel_left, neg_mul];
               field_simp [hn]
               ring_nf
-              try linarith [hx 0 ]
-            )
-            convert sub_nonneg.2 (le_of_lt (Nat.lt_floor_add_one (↑n * x 1))) using 1
-            ring
+              convert sub_nonneg.2 (le_of_lt (Nat.lt_floor_add_one (↑n * x 1))) using 1
+              ring
+            all_goals
+              simp only [Tco, sign_seg, det, Fin.isValue, Tside, translate_triangle,
+                translate_vector, scale_triangle, scale_vector, one_div, Δ₀', v₁_val, mul_zero,
+                add_zero, mul_one, sub_add_cancel_left, neg_mul, v₀_val, zero_sub, one_mul,
+                zero_mul, sub_zero, neg_add_rev];
+              field_simp [hn]
+              ring_nf
+              grind
           · rw [translate_triangle_det, scale_triangle_det, mul_ne_zero_iff_right]
             · simp only [one_div, ne_eq, inv_eq_zero, Nat.cast_eq_zero, hn, not_false_eq_true]
             · simp [det, Δ₀']
-    · have hx₁ : x 1 = 1 := by linarith [hx 1]
+    · have hx₁ : x 1 = 1 := by linarith [hx]
       · use translate_triangle (( n  - 1 ) / (n : ℝ)) (scale_triangle (1 / (n : ℝ)) Δ₀')
         constructor
         · right
@@ -300,13 +319,12 @@ lemma zig_zag_covers_square {n : ℕ} (hn : n ≠ 0)
         · rw [closed_triangle_iff]
           · intro i
             fin_cases i <;> (
-              simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀', hx₁];
+              simp [Tco, sign_seg, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀', hx₁];
               field_simp [hn]
               ring_nf
               try linarith [hx 0]
+              try grind
             )
-            rw [mul_assoc, mul_inv_cancel₀ ( Nat.cast_ne_zero.mpr hn)]
-            linarith [hx 0]
           · rw [translate_triangle_det, scale_triangle_det, mul_ne_zero_iff_right]
             · simp only [one_div, ne_eq, inv_eq_zero, Nat.cast_eq_zero, hn, not_false_eq_true]
             · simp [det, Δ₀']
@@ -317,18 +335,22 @@ lemma zig_zag_covers_square {n : ℕ} (hn : n ≠ 0)
       · have hs₀ := hS 0
         have hs₁ := hS 1
         have hs₂ := hS 2
-        simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀'] at hs₀ hs₁ hs₂
+        simp only [Tco, sign_seg, det, Fin.isValue, Tside, translate_triangle, translate_vector,
+          scale_triangle, scale_vector, Δ₀, v₁_val, mul_zero, add_zero, mul_one,
+          sub_add_cancel_left, neg_mul, v₀_val, zero_sub, one_mul, zero_mul, sub_zero, sub_self,
+          zero_add, add_neg_cancel_comm, div_inv_eq_mul, add_sub_cancel_left] at hs₀ hs₁ hs₂
         field_simp [hn] at hs₀ hs₁ hs₂
-        intro i; constructor <;> (fin_cases i <;> simp; linarith)
-        · convert div_le_div_of_nonneg_right (le_trans (Nat.cast_nonneg' _) hs₂) (Nat.cast_nonneg' n)
-          · simp only [zero_div]
-          · refine Eq.symm (mul_div_cancel_right₀ (x 1) (Nat.cast_ne_zero.mpr hn))
+        refine ⟨⟨?_,?_⟩,⟨?_,?_⟩⟩
+        · linarith
+        · linarith
+        · rw [le_add_neg_iff_le] at hs₂
+          convert div_le_div_of_nonneg_right (le_trans (Nat.cast_nonneg' _) hs₂) (Nat.cast_nonneg' n) <;> simp_all
         · rw [add_assoc, le_neg_add_iff_le] at hs₀
           have this := le_trans hs₁ hs₀
           rw [le_neg_add_iff_le] at this
           -- Following part is repeated below
           have this2 := div_le_div_of_nonneg_right this (Nat.cast_nonneg' n)
-          rw [(mul_div_cancel_right₀ (x 1) (Nat.cast_ne_zero.mpr hn))] at this2
+          rw [mul_comm, (mul_div_cancel_right₀ (x 1) (Nat.cast_ne_zero.mpr hn))] at this2
           apply le_trans this2
           apply (div_le_one₀ (Nat.cast_pos'.mpr (Nat.zero_lt_of_ne_zero hn))).mpr
           convert (Nat.cast_le (α := ℝ)).2 (@Nat.lt_iff_add_one_le.1 s.prop)
@@ -342,12 +364,17 @@ lemma zig_zag_covers_square {n : ℕ} (hn : n ≠ 0)
       · have hs₀ := hS 0
         have hs₁ := hS 1
         have hs₂ := hS 2
-        simp [Tco, sign_seg, set, det, scale_triangle, translate_triangle, scale_triangle, translate_vector, Tside, scale_vector, Δ₀, Δ₀'] at hs₀ hs₁ hs₂
+        simp only [Tco, sign_seg, det, Fin.isValue, Tside, translate_triangle, translate_vector,
+          scale_triangle, scale_vector, Δ₀', v₁_val, mul_one, sub_self, zero_mul, v₀_val, sub_zero,
+          one_mul, zero_add, zero_sub, neg_add_rev, mul_zero, add_zero, sub_add_cancel_left,
+          neg_mul, add_sub_cancel_left] at hs₀ hs₁ hs₂
         field_simp [hn] at hs₀ hs₁ hs₂
         conv at hs₀ => ring_nf
         conv at hs₁ => ring_nf
         conv at hs₂ => ring_nf
-        intro i; constructor <;> (fin_cases i <;> simp; linarith)
+        refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩⟩
+        · linarith
+        · linarith
         · have step₁ : 0 ≤ (x 1 * ↑n - ↑↑s) := le_trans hs₁ (by linarith)
           have step₂ : 0 ≤ x 1 * ↑n := le_trans (b := (s : ℝ)) (Nat.cast_nonneg' _) (by linarith)
           convert div_le_div_of_nonneg_right (c := (n : ℝ)) step₂ ?_

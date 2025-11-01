@@ -1,21 +1,18 @@
-import Mathlib
+import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Data.Real.Sign
 
-open Classical
-open BigOperators
 open Finset
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 
 
-/-
+/-!
   This file includes Mathlib type lemmas that we were not able to find,
   mostly because they are quite esoteric.
 -/
 
 
-/-
-  Some lemmas about Real.sign.
--/
+/-! ## Some lemmas about Real.sign. -/
 
 lemma sign_mul_pos {a b : ℝ} (ha : 0 < a) : Real.sign (a * b) = Real.sign b := by
   by_cases hb₀ : 0 < b
@@ -43,7 +40,7 @@ lemma sign_neg' {a : ℝ} (h : Real.sign a = -1) : a < 0 := by
 
 lemma sign_div_pos {a b : ℝ} (hb₀ : b ≠ 0) (hs : Real.sign a = Real.sign b) :
     0 < a / b := by
-  cases' Real.sign_apply_eq_of_ne_zero _ hb₀ with hbs hbs <;> rw [hbs] at hs
+  rcases Real.sign_apply_eq_of_ne_zero _ hb₀ with (hbs|hbs) <;> rw [hbs] at hs
   · exact div_pos_of_neg_of_neg (sign_neg' hs) (sign_neg' hbs)
   · exact div_pos (sign_pos' hs) (sign_pos' hbs)
 
@@ -76,7 +73,7 @@ lemma real_sign_abs_le {x : ℝ} : |Real.sign x| ≤ 1 := by
   obtain (hx | hx | hx) := Real.sign_apply_eq x <;> simp [hx]
 
 
-/- Other stuff. -/
+/-! ## Other stuff -/
 
 lemma mul_cancel {a b c : ℝ} (h : a ≠ 0) (h2: a * b = a * c) :
         b = c := by simp_all only [ne_eq, mul_eq_mul_left_iff, or_false]
@@ -90,23 +87,18 @@ lemma smul_cancel {a : ℝ} {b c : ℝ²} (h₁ : a ≠ 0) (h₂: a • b = a �
   simp [PiLp.smul_apply, smul_eq_mul, mul_eq_mul_left_iff, h₁] at l
   assumption
 
-
+open Classical in
 lemma fin2_im {α : Type} {f : Fin 2 → α}
     : Finset.image f (Finset.univ : Finset (Fin 2)) = {f 0, f 1} := by
   ext
-  simp
-  constructor
-  · intro ⟨j, g⟩
-    fin_cases j
-    · left; exact g.symm
-    · right; exact g.symm
-  · exact fun h ↦ by cases' h with h h <;> exact ⟨_, h.symm⟩
-
+  simp only [mem_image, mem_univ, true_and, Fin.exists_fin_two, Fin.isValue, mem_insert,
+    mem_singleton]
+  grind
 
 /- This lemma is in mathlib but somehow I cannot get it to work unless it is in this form. -/
 lemma forall_in_swap_special {α β : Type} {P : α → β → Prop} {Q : α → Prop} :
     (∀ a, Q a → ∀ b, P a b) ↔ (∀ b, ∀ a, Q a → P a b) :=
-  Set.forall_in_swap
+  by grind
 
 
 lemma forall_exists_pos_swap {α : Type} [Fintype α] {P : ℝ → α → Prop}
@@ -137,6 +129,7 @@ def real_interval_δ {x: ℝ} (y : ℝ) (hx : 0 < x) : ∃ δ > 0, ∀ a, |a| �
   · use x / (2 * |y|)
     constructor
     · field_simp [hy]
+      simp_all
     · intro a ha
       calc
         0     <   (1/2) * x       := by linarith
@@ -144,16 +137,15 @@ def real_interval_δ {x: ℝ} (y : ℝ) (hx : 0 < x) : ∃ δ > 0, ∀ a, |a| �
         _     ≤   x + a * y       := by
           gcongr x + ?_
           field_simp
-          rw [←neg_le_neg_iff, ←mul_le_mul_left (a := 2) (by norm_num), neg_div',neg_neg,
-              mul_div_cancel₀ _ (by norm_num)]
-          refine le_of_max_le_left (?_ : |2 * -(a * y)| ≤ x)
-          rw [abs_mul,Nat.abs_ofNat, abs_neg, abs_mul,mul_comm,mul_assoc]
-          nth_rw 2 [mul_comm]
-          refine (le_div_iff₀ ?_).mp ha
-          simp_all only [Nat.ofNat_pos, mul_pos_iff_of_pos_left, abs_pos, ne_eq, not_false_eq_true]
+          rw [←neg_le_neg_iff, ←mul_le_mul_iff_right₀ (a := 2) (by norm_num), neg_neg]
+          gcongr 2 * ?_
+          apply le_of_max_le_right (?_ : |2 * a * y| ≤ x)
+          rw [abs_mul, abs_mul, Nat.abs_ofNat]
+          rw [le_div_iff₀ ?_] at ha
+          · grind
+          · exact mul_pos zero_lt_two (abs_pos.mpr hy)
 
-
-/- Pigeonhole lemma of the form that I have not been able to find. -/
+/-- Pigeonhole lemma of the form that I have not been able to find. -/
 lemma finset_infinite_pigeonhole {α β : Type} [Infinite α] {f : α → β} {B : Finset β}
     (hf : ∀ a, f a ∈ B) : ∃ b ∈ B, Set.Infinite (f⁻¹' {b}) := by
   have : Finite B := by exact Finite.of_fintype { x // x ∈ B }
@@ -168,7 +160,7 @@ lemma finset_infinite_pigeonhole {α β : Type} [Infinite α] {f : α → β} {B
     simp [f_B]
 
 lemma infinite_distinct_el {α : Type} {S : Set α} (hS : Set.Infinite S) (k : α) : ∃ a ∈ S, a ≠ k := by
-  have ⟨a, haS, ha⟩ :=  Set.Infinite.exists_not_mem_finset hS ({k} : Finset α)
+  have ⟨a, haS, ha⟩ :=  Set.Infinite.exists_notMem_finset hS ({k} : Finset α)
   exact ⟨a, haS, List.ne_of_not_mem_cons ha⟩
 
 lemma infinite_imp_two_distinct_el  {α : Type} {S : Set α} (hS : S.Infinite) : ∃ a ∈ S, ∃ b ∈ S, a ≠ b := by

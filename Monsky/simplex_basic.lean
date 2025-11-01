@@ -1,5 +1,7 @@
-import Mathlib
-import Mathlib.Tactic
+import Mathlib.Algebra.Order.Ring.Star
+import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Data.Int.Star
+import Mathlib.Order.CompletePartialOrder
 
 local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 
@@ -7,12 +9,7 @@ open Classical
 open Finset
 
 
-
-
-
-
-
--- Shorthand for defining an element of ℝ²
+/-- Shorthand for defining an element of ℝ² -/
 def v (x y : ℝ) : ℝ² := fun | 0 => x | 1 => y
 
 @[simp]
@@ -21,11 +18,12 @@ lemma v₀_val {x y : ℝ} : (v x y) 0 = x := rfl
 lemma v₁_val {x y : ℝ} : (v x y) 1 = y := rfl
 
 
--- Definition of an n-dimensional standard simplex.
+/-! Definition of an n-dimensional standard simplex. -/
+
 def closed_simplex (n : ℕ)  : Set (Fin n → ℝ) := {α | (∀ i, 0 ≤ α i) ∧ ∑ i, α i = 1}
 def open_simplex   (n : ℕ)  : Set (Fin n → ℝ) := {α | (∀ i, 0 < α i) ∧ ∑ i, α i = 1}
 
-/-
+/-!
   The Fin n → ℝ² in the following definitions represents the vertices of a polygon.
   Beware: Whenever the n vertices do not define an n-gon, i.e. a vertex lies within the
   convex hull of the others, the open_hull does not give the topological interior of the closed
@@ -33,6 +31,7 @@ def open_simplex   (n : ℕ)  : Set (Fin n → ℝ) := {α | (∀ i, 0 < α i) �
 
   Also when f i = P for all i, both the closed_hull and open_hull are {P i}.
 -/
+
 def closed_hull {n : ℕ} (f : Fin n → ℝ²) : Set ℝ² := (fun α ↦ ∑ i, α i • f i) '' closed_simplex n
 def open_hull   {n : ℕ} (f : Fin n → ℝ²) : Set ℝ² := (fun α ↦ ∑ i, α i • f i) '' open_simplex n
 
@@ -226,7 +225,7 @@ lemma boundary_sub_closed {n : ℕ} (P : Fin n → ℝ²) : boundary P ⊆ close
   Set.diff_subset
 
 lemma boundary_not_in_open {n : ℕ} {P : Fin n → ℝ²} {x : ℝ²} (hx : x ∈ boundary P) :
-    x ∉ open_hull P :=  Set.not_mem_of_mem_diff hx
+    x ∉ open_hull P := Set.notMem_of_mem_diff hx
 
 lemma boundary_in_closed {n : ℕ} {P : Fin n → ℝ²} {x : ℝ²} (hx : x ∈ boundary P) :
     x ∈ closed_hull P := Set.mem_of_mem_diff hx
@@ -246,7 +245,7 @@ lemma open_closed_hull_minus_boundary {n : ℕ} {P : Fin n → ℝ²} :
 
 lemma boundary_constant {n : ℕ} {P : ℝ²} :
     boundary (fun (_ : Fin n) ↦ P) = ∅ := by
-  cases' (ne_or_eq n 0) with hn hz
+  rcases ne_or_eq n 0 with (hn|hz)
   · unfold boundary
     rw [open_hull_constant hn, closed_hull_constant hn]
     simp only [sdiff_self, Set.bot_eq_empty]
@@ -261,7 +260,7 @@ lemma boundary_constant {n : ℕ} {P : ℝ²} :
 
 lemma open_hull_constant_rev {n : ℕ} {P : ℝ²} {f : Fin n → ℝ²}
     (ho : open_hull f = {P}) : ∀ i, f i = P :=  by
-  cases' eq_or_ne 0 n with hz hn
+  rcases eq_or_ne 0 n with (hz|hn)
   · intro i
     subst hz
     by_contra h
