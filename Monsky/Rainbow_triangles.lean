@@ -1,6 +1,4 @@
-import Mathlib.Tactic
 import Monsky.Appendix
-import Monsky.simplex_basic
 import Monsky.segment_triangle
 
 /-!
@@ -11,13 +9,11 @@ local notation "ℝ²" => EuclideanSpace ℝ (Fin 2)
 local notation "Triangle" => Fin 3 → ℝ²
 local notation "Segment" => Fin 2 → ℝ²
 
-open BigOperators
-open Classical
-open Finset
-
--- First we define the inductive type Color, which will be the target type of the coloring
--- function. The coloring function will take a point in ℝ² and return a color from Color (eg. Red
--- Blue or Green).
+/-!
+First we define the inductive type `Color`, which will be the target type of the coloring
+function. The coloring function will take a point in ℝ² and return a color from Color (eg. Red
+Blue or Green).
+-/
 
 inductive Color
 | Red
@@ -27,16 +23,17 @@ inductive Color
 variable {Γ₀ : Type} [LinearOrderedCommGroupWithZero Γ₀]
 variable (v : Valuation ℝ Γ₀)
 
--- Now we define the coloring function as it appears in the Book.
-
+/-- The coloring function as it appears in the Book. -/
 def coloring : (X : ℝ²) → Color
 | X => if v (X 0) < v 1 ∧ v (X 1) < v 1 then Color.Red
   else if v (X 0) < v (X 1) ∧ v (X 1) ≥ v 1 then Color.Green
   else Color.Blue
 
--- The next three lemmas below reverse the coloring function.
--- Namely, for a given color they return inequalities describing the region with this color.
--- They will be of use in the proof of the lemma on the boundedness of the determinant.
+/-!
+The next three lemmas below reverse the coloring function.
+Namely, for a given color they return inequalities describing the region with this color.
+They will be of use in the proof of the lemma on the boundedness of the determinant.
+-/
 
 lemma green_region (X : ℝ²) : (coloring v X = Color.Green) → v (X 0) < v (X 1) ∧ v (X 1) ≥ v (1) := by
   intro h
@@ -118,8 +115,8 @@ lemma valuation_bounds
   clear hb hg hr
 
   -- Non-negativity bounds
-  have x0_gt_zero : v (X 0) > 0 := gt_of_ge_of_gt hx0 zero_lt_one
-  have y1_gt_zero : v (Y 1) > 0 := gt_of_ge_of_gt hy1 zero_lt_one
+  have x0_gt_zero : v (X 0) > 0 := lt_of_le_of_lt' hx0 zero_lt_one
+  have y1_gt_zero : v (Y 1) > 0 := lt_of_le_of_lt' hy1 zero_lt_one
 
   -- v (X 0) * v (Y 1) ≥ 1
   constructor
@@ -129,7 +126,7 @@ lemma valuation_bounds
   constructor
   apply mul_lt_mul'
   exact hxx
-  exact gt_of_ge_of_gt hy1 hz0
+  exact lt_of_le_of_lt' hy1 hz0
   exact zero_le'
   exact x0_gt_zero
 
@@ -138,7 +135,7 @@ lemma valuation_bounds
   rw [mul_comm (v (X 0)) (v (Y 1))]
   apply mul_lt_mul''
   exact hyy
-  exact gt_of_ge_of_gt hx0 hz1
+  exact lt_of_le_of_lt' hx0 hz1
   exact zero_le'
   exact zero_le'
 
@@ -147,7 +144,7 @@ lemma valuation_bounds
   rw [mul_comm (v (X 0)) (v (Y 1))]
   apply mul_lt_mul'
   apply refl
-  exact gt_of_ge_of_gt hx0 hz0
+  exact lt_of_le_of_lt' hx0 hz0
   exact zero_le'
   exact y1_gt_zero
 
@@ -160,7 +157,7 @@ lemma valuation_bounds
   -- v (X 0) * v (Y 1) > v (X 0) * v (Z 1)
   apply mul_lt_mul'
   apply refl
-  exact gt_of_ge_of_gt hy1 hz1
+  exact lt_of_le_of_lt' hy1 hz1
   exact zero_le'
   exact x0_gt_zero
 
@@ -314,6 +311,7 @@ lemma linear_combination_det_first {n : ℕ} {y z : ℝ²} {P : Fin n → ℝ²}
     simp [b_sign, σ];
     congr; funext k; fin_cases k <;> rfl
 
+open Finset in
 lemma linear_combination_det_last' {n : ℕ} {x y : ℝ²} {P : Fin n → ℝ²} {α : Fin n → ℝ}
     (hα : ∑ i, α i = 1) :
   det (fun | 0 => x | 1 => y | 2 => (∑ i, α i • P i)) =
@@ -370,8 +368,9 @@ theorem no_Color_lines
   have vdet1 : v (det xyz) ≥ 1 := by
     have h_det : det xyz =
       (x 0 * y 1 + x 1 * z 0 + y 0 * z 1 - y 1 * z 0 - x 1 * y 0 - x 0 * z 1) := by
-      simp [det]
+      simp only [det, Fin.isValue]
       ring_nf
+      grind
     rw [h_det]
     apply bounded_det
     exact hxb
@@ -385,7 +384,7 @@ theorem no_Color_lines
 -- We show next that the coloring of (0,0) is red, (0,1) is green and (1,0) is blue.
 
 lemma red00 : coloring v ![0,0] = Color.Red := by
-  simp [coloring, Fin.isValue, map_one, ge_iff_le]
+  simp [coloring, Fin.isValue, map_one]
 
 lemma green01 : coloring v ![0,1] = Color.Green := by
   simp [coloring, Fin.isValue, map_one, ge_iff_le]
@@ -511,4 +510,4 @@ theorem no_odd_rainbow_triangle
   have bound3: v (det T) < 1 := by
     rw [v1]
     apply bound2
-  exact bound3.not_le bound
+  exact bound3.not_ge bound

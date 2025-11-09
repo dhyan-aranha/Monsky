@@ -8,3 +8,4 @@ name = "Monsky"
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
+ref = "v4.25.0-rc2"
